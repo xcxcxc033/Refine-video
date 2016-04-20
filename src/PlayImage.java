@@ -197,6 +197,7 @@ public class PlayImage {
 	}
 
 	public BufferedImage getCurrentImg() {
+		EvaluateMotion evaluateMotion = new EvaluateMotionByCompareAverageValueInBlock(15, 15, 100);
 		synchronized (currentLock) {
 			if(current >= bufferedImgs.length){
 				return null;
@@ -205,6 +206,9 @@ public class PlayImage {
 				if (last == current) {
 					return null;
 				} else {
+					if(last!= 0 && last != -1){
+						System.out.println(evaluateMotion.evaluateMotionBetweenImage(bufferedImgs[last], bufferedImgs[current]));
+					}
 					last = current;
 					return bufferedImgs[current];
 				}
