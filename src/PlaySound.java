@@ -41,8 +41,6 @@ public class PlaySound {
     	this.buffer = waveStream;
     }
 
-   // byte[] bytes = IOUtils.toByteArray(waveStream);
-
     //Peter
     
     SourceDataLine dataLine = null;
@@ -93,7 +91,6 @@ public class PlaySound {
 	} catch (LineUnavailableException e1) {
 	    throw new PlayWaveException(e1);
 	}
-	
 
 
     }
