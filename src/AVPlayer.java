@@ -183,7 +183,7 @@ public class AVPlayer {
 		
 		
 		// initializes the playSound Object
-		playSound = new PlaySound(buffer);
+		playSound = new PlaySound(buffer,filename);
 		// plays the sound
 		try {
 			playSound.play();

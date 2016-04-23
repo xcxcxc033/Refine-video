@@ -28,6 +28,7 @@ import javax.sound.sampled.DataLine.Info;
 public class PlaySound {
 
     private InputStream waveStream;
+    private String filename;
     int readBytes = 0;
     
 
@@ -36,9 +37,10 @@ public class PlaySound {
     /**
      * CONSTRUCTOR
      */
-    public PlaySound(byte[] waveStream) {
+    public PlaySound(byte[] waveStream, String filename) {
 	//this.waveStream = new BufferedInputStream(waveStream);
     	this.buffer = waveStream;
+    	this.filename = filename;
     }
 
     //Peter
@@ -55,7 +57,7 @@ public class PlaySound {
 	File audio = null;
 	try {
 	    //audioInputStream = AudioSystem.getAudioInputStream(this.waveStream);
-		audio = new File("Alin_Day1_002.wav"); 
+		audio = new File(this.filename); 
 	    wav_file_format = AudioSystem.getAudioInputStream(audio);
 	    //AudioSystem.getAudio
 	    

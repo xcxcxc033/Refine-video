@@ -81,6 +81,21 @@ public class PlayImage {
 //				for (int i = 0; i != PlayImage.this.frameNumberToPlay.length; i++) {
 //					System.out.println(PlayImage.this.frameNumberToPlay[i]);
 //				}
+				CommunicateVariables communicateVariables = CommunicateVariables.getSingular();
+				communicateVariables.imageIndexInput(frameNumberToPlay);
+				while(! communicateVariables.finished()){
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+				frameNumberToPlay = communicateVariables.getIndex();
+//				for (int i = 0; i != PlayImage.this.frameNumberToPlay.length; i++) {
+//					System.out.println(PlayImage.this.frameNumberToPlay[i]);
+//				}
 				processFinished = true;
 
 			}
@@ -140,6 +155,9 @@ public class PlayImage {
 			return null;
 		}
 		synchronized (currentLock) {
+			if(current >= bufferedImgs.length){
+				return null;
+			}
 			if (frameNumberToPlay[current] >= bufferedImgs.length) {
 				return null;
 			}

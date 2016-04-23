@@ -49,6 +49,9 @@ public class calculate_audio {
 		//System.out.println(this.EXTERNAL_BUFFER_SIZE/15/60/5);
 		System.out.println("b2" + readBytes);
 		
+		int[] index = new int[4500];
+		int index_iter = 0;
+		
 		byte[] new_audioBuffer = new byte[fileLength];
 		byte[] buffer = new byte[3200 * 5];
 		int new_iter = 0;
@@ -61,13 +64,34 @@ public class calculate_audio {
 			double db = soundLevel(buffer);
 			
 			if(db > -7.60){
-				
+				index[index_iter++] = i/3200;
 				for(int j = i; j < i + buffer.length; j++){
 					if(j >= audioBuffer.length) break;
 					new_audioBuffer[new_iter++] = audioBuffer[j];
 				}
 			}
 			
+		}
+		
+		CommunicateVariables communicateVariables = CommunicateVariables.getSingular();
+		communicateVariables.audioIndexInput(index);
+		
+		while(!communicateVariables.finished()){
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		communicateVariables.getIndex();
+		int ret_iter = 0;
+		byte[] ret = new byte[fileLength];
+		for(int i = 0; i < communicateVariables.getIndex().length; i++){
+			for(int j = 0; j < 3200; j++ ){
+				ret[ret_iter++] = audioBuffer[j+communicateVariables.getIndex()[i]*3200];
+			}
 		}
 		
 		//return waveStreamForCalculate;
@@ -96,7 +120,8 @@ public class calculate_audio {
 			e.printStackTrace();
 		}
 		*/
-		return new_audioBuffer;
+		System.out.println("ret finish");
+		return ret;
 		
 	}
 	
