@@ -155,7 +155,7 @@ public class PlayImage {
 			return null;
 		}
 		synchronized (currentLock) {
-			if(current >= bufferedImgs.length){
+			if(current >= frameNumberToPlay.length){
 				return null;
 			}
 			if (frameNumberToPlay[current] >= bufferedImgs.length) {

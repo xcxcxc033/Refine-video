@@ -82,7 +82,7 @@ public class CommunicateVariables {
 				j++;
 			}
 			else {
-				if(temp.size() == 0 || temp.get(temp.size()-1) == imageIndex[i]){
+				if(temp.size() == 0 || temp.get(temp.size()-1) != imageIndex[i]){
 					temp.add(imageIndex[i]);
 				}
 				i++;
@@ -91,8 +91,18 @@ public class CommunicateVariables {
 			
 		}
 		int[] result = new int[temp.size()];
+		System.out.println("audio");
+		for(i = 0; i!= audioIndex.length; i++){
+			System.out.println(audioIndex[i]);
+		}
+		System.out.println("image");
+		for(i = 0; i!= imageIndex.length; i++){
+			System.out.println(imageIndex[i]);
+		}
+		System.out.println("reslt");
 		for(i = 0; i!= result.length; i++){
 			result[i] = temp.get(i);
+			System.out.println(result[i]);
 		}
 		return result;
 	}

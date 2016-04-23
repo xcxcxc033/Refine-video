@@ -53,7 +53,7 @@ public class calculate_audio {
 		int index_iter = 0;
 		
 		byte[] new_audioBuffer = new byte[fileLength];
-		byte[] buffer = new byte[3200 * 5];
+		byte[] buffer = new byte[3200 * 10];
 		int new_iter = 0;
 		for(int i = 0; i < audioBuffer.length; i += buffer.length){
 			int buffer_iter = 0;
@@ -85,12 +85,12 @@ public class calculate_audio {
 			}
 		}
 		
-		communicateVariables.getIndex();
+		int[] temp = communicateVariables.getIndex();
 		int ret_iter = 0;
 		byte[] ret = new byte[fileLength];
-		for(int i = 0; i < communicateVariables.getIndex().length; i++){
+		for(int i = 0; i < temp.length; i++){
 			for(int j = 0; j < 3200; j++ ){
-				ret[ret_iter++] = audioBuffer[j+communicateVariables.getIndex()[i]*3200];
+				ret[ret_iter++] = audioBuffer[j+temp[i]*3200];
 			}
 		}
 		
