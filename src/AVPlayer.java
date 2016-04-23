@@ -128,9 +128,11 @@ public class AVPlayer {
 		
 
 			while (true) {
-				BufferedImage img = playImage.getCurrentImg();
+//				BufferedImage img = playImage.getCurrentImg();
+				BufferedImage img = playImage.getCurrentImageIgnoreMotionless();
 				while (img == null) {
-					img = playImage.getCurrentImg();
+//					img = playImage.getCurrentImg();
+					img = playImage.getCurrentImageIgnoreMotionless();
 					Thread.sleep(10);
 					// System.out.println(img);
 				}

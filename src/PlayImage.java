@@ -20,6 +20,11 @@ public class PlayImage {
 	private BufferedImage[] bufferedImgs;
 	private int last = -1;
 	private String filename;
+	private int motionlessFrame = 0;
+	private double[] evaluateMotionResult;
+	private boolean processFinished = false;
+	private int[] frameNumberToPlay;
+	
 
 	public PlayImage(final String filename) {
 		this.filename = filename;
@@ -43,10 +48,77 @@ public class PlayImage {
 		Thread read = new Thread() {
 			public void run() {
 				PlayImage.this.allFrames(filename);
+				PlayImage.this.evaluateMotionResult = PlayImage.this.getEvaluateMotionResult();
+				PlayImage.this.frameNumberToPlay = PlayImage.this.generateFrameNumberToPlay(10);
+				for(int i = 0; i != PlayImage.this.frameNumberToPlay.length; i++){
+					System.out.println(PlayImage.this.frameNumberToPlay[i]);
+				}
+				processFinished = true;
+				
 			}
 		};
 		read.start();
 
+	}
+	
+	public int[] generateFrameNumberToPlay(double valve){
+		double[] evaluateValue = getEvaluateValue();
+		int[] temp = new int[bufferedImgs.length];
+		int current = 0;
+		for(int i = 0; i!= evaluateValue.length; i++){
+			if(evaluateValue[i] > valve){
+				temp[current] = i;
+				current++;
+			}
+		}
+		return temp;
+	}
+	public double[] getEvaluateValue(){
+		return evaluateMotionResult;
+	}
+	
+	
+	
+	
+	public BufferedImage getCurrentImageIgnoreMotionless(){
+		if(this.processFinished == false){
+			return null;
+		}
+		synchronized (currentLock) {
+			if(frameNumberToPlay[current] >= bufferedImgs.length){
+				return null;
+			}
+			synchronized (locks[current]) {
+				if (last == current) {
+					return null;
+				} else if(bufferedImgs[frameNumberToPlay[current]] == null){
+					System.out.println("fdsfssfsdfsf");
+					return null;
+				}
+				else {
+					
+					last = current;
+					return bufferedImgs[frameNumberToPlay[current]];
+				}
+
+			}
+		}
+	}
+	
+	public double[] getEvaluateMotionResult(){
+//		EvaluateMotion evaluateMotion = new EvaluateMotionByFramePredict(15, 15, 5, 5);
+		EvaluateMotion evaluateMotion = new EvaluateMotionByCompareAverageValueInBlock(15, 15, 100);
+		
+		double[] result = new double[bufferedImgs.length];
+		result[0] = 0;
+		for(int i = 1; i < bufferedImgs.length;i++){
+			System.out.println(bufferedImgs[0]);
+			System.out.println(bufferedImgs[1]);
+			result[i] = evaluateMotion.evaluateMotionBetweenImage(bufferedImgs[i-1], bufferedImgs[i]);
+			System.out.println(i);
+			System.out.println(result[i]);
+		}
+		return result;
 	}
 
 	public BufferedImage getFirstImage() {
@@ -126,32 +198,23 @@ public class PlayImage {
 	public void allFrames(InputStream is) {
 
 		try {
-			while (true) {
-				// System.out.println(current);
-				int temp_current = 0;
-				synchronized (currentLock) {
-					temp_current = current;
-				}
-
-				int temp_loadedFrame = loadedFrame;
-				for (int i = temp_loadedFrame + 1; i < bufferedImgs.length
-						&& i < loadFrame + temp_current; i++) {
-					synchronized (locks[i]) {
-						if (bufferedImgs[i] == null) {
-							bufferedImgs[i] = readNextFrame(is);
-							loadedFrame = i;
+			for (int i = 0; i < bufferedImgs.length; i++) {
+				
+				synchronized (locks[i]) {
+					if (bufferedImgs[i] == null) {
+						BufferedImage temp = readNextFrame(is);
+						if(i == 0){
+							System.out.println(temp);
 						}
+						bufferedImgs[i] = temp;
+						loadedFrame = i;
+						System.out.println(i);
 					}
-					// System.out.println(i);
 				}
-				if (temp_current + loadedFrame / 2 < temp_loadedFrame) {
-					Thread.sleep(1);
-				}
-
+				
+				// System.out.println(i);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally {
 
@@ -191,7 +254,7 @@ public class PlayImage {
 				ind++;
 			}
 		}
-
+//		System.out.println(img);
 		return img;
 
 	}
