@@ -4,11 +4,12 @@ import java.awt.event.ActionListener;
 import java.awt.image.*;
 import java.io.*;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimerTask;
@@ -158,26 +159,51 @@ public class AVPlayer {
 	// peter
 
 	public void playWAV(String filename) {
+		
+		
 		// opens the inputStream
 		FileInputStream inputStream1;
-		FileInputStream inputStream2;
+		InputStream inputStream2;
+		byte[] buffer = null;
 		try {
+			System.out.println("step - 1");
 			inputStream1 = new FileInputStream(filename);
-			inputStream2 = new FileInputStream(filename);
+			//inputStream1 = new FileInputStream("a.wav");
+			
+			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return;
 		}
-
+		
+		File file = new File(filename);
+		
+	
+		System.out.println("step - 2");
+		calculate_audio audio = new calculate_audio();
+		buffer = audio.calculate_audio(inputStream1,(int)file.length());
+/**		
+		FileInputStream stream = null;
+		try {
+			stream = new FileInputStream("a.wav");
+			//stream = new FileInputStream("a.wav");
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+*/		
+		
+		
 		// initializes the playSound Object
-		playSound = new PlaySound(inputStream1,inputStream2);
+		playSound = new PlaySound(buffer);
 		// plays the sound
 		try {
 			playSound.play();
-		} catch (PlayWaveException e) {
+		} catch (PlayWaveException | IOException e) {
 			e.printStackTrace();
 			return;
 		}
+		
 	}
 
 	public void setBtnListener() {
