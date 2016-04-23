@@ -115,7 +115,7 @@ public class PlaySound {
 	
 	for(int i = 0; i < readBytes; i++){
 		audioBuffer[i] = (byte)(-1 * audioBuffer[i]);
-		System.out.println(audioBuffer[i]);
+//		System.out.println(audioBuffer[i]);
 	}
 		
 
