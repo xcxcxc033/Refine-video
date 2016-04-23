@@ -25,8 +25,25 @@ public class PlayImage {
 	private boolean processFinished = false;
 	private int[] frameNumberToPlay;
 	
+	
+	//peter
+	public int[][][] histogram = new int[4][4][4];
+	public int[][][] nextHistogram = new int[4][4][4];
+	public int frameRate = 15;
+	public int secForScene = 5;
+	public int SceneFrameCounter = 0;
+	public boolean findNextScene = false;
+	public int senceDiff = 0;
+	public int senceThreshold = 5000000;
+	public int[] sumFrame;
+	public int numOfFrame = 0;
+	public int sumIndex = 0;
+	public int[] senceChangeFrame;
+	public int senceChangeIndex =0;
+	//peter
+	
 
-	public PlayImage(final String filename) {
+	public PlayImage(String filename) {
 		this.filename = filename;
 		File file = new File(filename);
 		InputStream is;
@@ -40,6 +57,13 @@ public class PlayImage {
 		// long len = file.length();
 		long len = width * height * 3;
 		bufferedImgs = new BufferedImage[(int) (file.length() / len)];
+		
+		
+		//peter
+		sumFrame = new int[(int) (file.length() / len)];
+		senceChangeFrame = new int[(int) (file.length() / len)];
+		senceChangeFrame[0]=0;
+		//peter
 
 		locks = new Integer[bufferedImgs.length];
 		for (int i = 0; i != locks.length; i++) {
@@ -198,13 +222,20 @@ public class PlayImage {
 	public void allFrames(InputStream is) {
 
 		try {
-			for (int i = 0; i < bufferedImgs.length; i++) {
-				
-				synchronized (locks[i]) {
-					if (bufferedImgs[i] == null) {
-						BufferedImage temp = readNextFrame(is);
-						if(i == 0){
-							System.out.println(temp);
+			while (true) {
+				// System.out.println(current);
+				int temp_current = 0;
+				synchronized (currentLock) {
+					temp_current = current;
+				}
+
+				int temp_loadedFrame = loadedFrame;
+				for (int i = temp_loadedFrame + 1; i < bufferedImgs.length
+						; i++) {
+					synchronized (locks[i]) {
+						if (bufferedImgs[i] == null) {
+							bufferedImgs[i] = readNextFrame(is);
+							loadedFrame = i;
 						}
 						bufferedImgs[i] = temp;
 						loadedFrame = i;
@@ -238,6 +269,11 @@ public class PlayImage {
 		}
 
 		int ind = 0;
+		
+		if(findNextScene){
+			SceneFrameCounter = 0;
+			System.out.println("findNextScene" + findNextScene);
+		
 		for (int y = 0; y < height; y++) {
 
 			for (int x = 0; x < width; x++) {
@@ -246,7 +282,20 @@ public class PlayImage {
 				byte r = bytes[ind];
 				byte g = bytes[ind + height * width];
 				byte b = bytes[ind + height * width * 2];
-
+//peter
+				int red = r;
+				if (r < 0) red = red+256;
+				int green = g;
+				if (g < 0) green = green+256;
+				int blue = b;
+				if (b < 0) blue = blue+256;
+				
+				r = (byte) red;
+				g = (byte) green;
+				b = (byte) blue;
+				
+				nextHistogram[red / 64][green / 64][blue / 64]++;
+				
 				int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8)
 						| (b & 0xff);
 				// int pix = ((a << 24) + (r << 16) + (g << 8) + b);
@@ -254,13 +303,78 @@ public class PlayImage {
 				ind++;
 			}
 		}
-//		System.out.println(img);
+		for(int i = 0; i < histogram.length; i++)
+            for(int j = 0; j < histogram[i].length; j++)
+                for(int p = 0; p < histogram[i][j].length; p++){
+                	senceDiff = Math.abs(histogram[i][j][p] - nextHistogram[i][j][p]);
+                }
+		if(senceDiff >= senceThreshold){
+			findNextScene = false;
+			for(int i = 0; i < histogram.length; i++)
+	            for(int j = 0; j < histogram[i].length; j++)
+	                for(int p = 0; p < histogram[i][j].length; p++){
+	                	histogram[i][j][p] = nextHistogram[i][j][p];
+	                }
+			senceChangeIndex++;
+			senceChangeFrame[senceChangeIndex]=numOfFrame;
+		}
+		senceDiff = 0;
+		
+	}
+		else{
+		for (int y = 0; y < height; y++) {
+
+			for (int x = 0; x < width; x++) {
+
+				byte a = 0;
+				byte r = bytes[ind];
+				byte g = bytes[ind + height * width];
+				byte b = bytes[ind + height * width * 2];
+//peter
+				if( SceneFrameCounter >= frameRate*secForScene){
+				int red = r;
+				if (r < 0) red = red+256;
+				int green = g;
+				if (g < 0) green = green+256;
+				int blue = b;
+				if (b < 0) blue = blue+256;
+				
+				r = (byte) red;
+				g = (byte) green;
+				b = (byte) blue;
+				
+				histogram[red / 64][green / 64][blue / 64]++;
+				findNextScene = true;
+				}
+				
+//peter			
+//				 for(int i = 0; i < histogram.length; i++)
+//			            for(int j = 0; j < histogram[i].length; j++)
+//			                for(int p = 0; p < histogram[i][j].length; p++){
+//			                	
+//			                }
+				
+				int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8)
+						| (b & 0xff);
+				// int pix = ((a << 24) + (r << 16) + (g << 8) + b);
+				img.setRGB(x, y, pix);
+				ind++;
+				
+				
+			}
+		}
+		sumFrame[sumIndex] = numOfFrame;
+		sumIndex++;
+		SceneFrameCounter++;
+		System.out.println(SceneFrameCounter);
+		}
+		
+		numOfFrame++;
 		return img;
 
 	}
 
 	public BufferedImage getCurrentImg() {
-		EvaluateMotion evaluateMotion = new EvaluateMotionByCompareAverageValueInBlock(15, 15, 100);
 		synchronized (currentLock) {
 			if(current >= bufferedImgs.length){
 				return null;
@@ -269,11 +383,24 @@ public class PlayImage {
 				if (last == current) {
 					return null;
 				} else {
-					if(last!= 0 && last != -1){
-						System.out.println(evaluateMotion.evaluateMotionBetweenImage(bufferedImgs[last], bufferedImgs[current]));
-					}
 					last = current;
 					return bufferedImgs[current];
+				}
+
+			}
+		}
+	}
+	public BufferedImage getCurrentImgScenery() {
+		synchronized (currentLock) {
+			if(current >= bufferedImgs.length){
+				return null;
+			}
+			synchronized (locks[current]) {
+				if (last == current) {
+					return null;
+				} else {
+					last = current;
+					return bufferedImgs[sumFrame[current]];
 				}
 
 			}

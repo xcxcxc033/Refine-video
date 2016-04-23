@@ -85,9 +85,6 @@ public class AVPlayer {
 
 		frame.setSize(500, 450);
 
-		// peter
-		// ButtonLayOut btn = new ButtonLayOut();
-		// btn.initbtnMainLabel(btnMainLabel);
 
 		ButtonLayOut btnLayOut = new ButtonLayOut();
 		btnMainLabel.setPreferredSize(new Dimension(300, 60));
@@ -102,19 +99,7 @@ public class AVPlayer {
 		btnMainLabel.add(btnStart, BorderLayout.CENTER);
 		btnMainLabel.add(btnStop, BorderLayout.EAST);
 		setBtnListener();
-		// btnReplay.
-
-		// peter
-
-		// btn.initButton_pause(button_pause);
-		// btn.initButton_stop(button_stop);
-
-		// java.util.List<BufferedImage> frames = allFrames(args[0]);
-		// for(int i = 0; i!= frames.size(); i++){
-		// BufferedImage img = frames.get(i);
-		// lbIm1.setIcon(new ImageIcon(img));
-		// Thread.sleep(66);
-		// }
+		
 
 	}
 
@@ -128,14 +113,15 @@ public class AVPlayer {
 		
 
 			while (true) {
-//				BufferedImage img = playImage.getCurrentImg();
-				BufferedImage img = playImage.getCurrentImageIgnoreMotionless();
+			//	BufferedImage img = playImage.getCurrentImg();
+				BufferedImage img = playImage.getCurrentImgScenery();
 				while (img == null) {
-//					img = playImage.getCurrentImg();
-					img = playImage.getCurrentImageIgnoreMotionless();
+					//img = playImage.getCurrentImg();
+					img =  playImage.getCurrentImgScenery();
 					Thread.sleep(10);
 					// System.out.println(img);
 				}
+				//System.out.println(img);
 				lbIm1.setIcon(new ImageIcon(img));
 				img = null;
 			}
@@ -161,18 +147,16 @@ public class AVPlayer {
 
 	public void playWAV(String filename) {
 		// opens the inputStream
-		FileInputStream inputStream1;
-		FileInputStream inputStream2;
+		FileInputStream inputStream;
 		try {
-			inputStream1 = new FileInputStream(filename);
-			inputStream2 = new FileInputStream(filename);
+			inputStream = new FileInputStream(filename);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return;
 		}
 
 		// initializes the playSound Object
-		playSound = new PlaySound(inputStream1,inputStream2);
+		playSound = new PlaySound(inputStream);
 		// plays the sound
 		try {
 			playSound.play();
